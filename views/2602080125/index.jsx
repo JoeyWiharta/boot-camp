@@ -1,9 +1,11 @@
 "use client"
+
 import { useState, useEffect, useMemo, useRef } from "react"
 
 const MyPage = () => {
     const [count, setCount] = useState(0)
     const inputRef = useRef(null)
+
     useEffect(() => {
         document.title = "Joey Liauw Wiharta"
     }, [])
@@ -12,6 +14,7 @@ const MyPage = () => {
         if (count === 0) {
             return "Button hasn't been clicked yet."
         }
+
         return `Button clicked ${count} ${count === 1 ? "time" : "times"}.`
     }, [count])
 
@@ -20,43 +23,13 @@ const MyPage = () => {
     }
 
     return (
-        // Note: Tailwind CSS is not used because it is not configured in this project.
-        <div
-            style={{
-                minHeight: "100vh",
-                backgroundColor: "#f5f5f5",
-                padding: "48px 24px",
-                boxSizing: "border-box",
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: "700px",
-                    margin: "0 auto",
-                    backgroundColor: "#ffffff",
-                    padding: "32px",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)",
-                }}
-            >
-                <h1
-                    style={{
-                        margin: "0",
-                        fontSize: "30px",
-                        fontWeight: "700",
-                        color: "#222222",
-                    }}
-                >
+        <div className="min-h-screen bg-gray-50 px-6 py-12">
+            <div className="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-sm">
+                <h1 className="text-3xl font-bold text-gray-900">
                     Joey Liauw Wiharta - 2602080125
                 </h1>
 
-                <p
-                    style={{
-                        marginTop: "16px",
-                        lineHeight: "1.7",
-                        color: "#555555",
-                    }}
-                >
+                <p className="mt-4 leading-7 text-gray-600">
                     I am a Computer Science student with a strong interest in frontend
                     development. I have experience building web applications with React and
                     TypeScript, including reusable components, responsive interfaces, and
@@ -64,85 +37,36 @@ const MyPage = () => {
                     CSS.
                 </p>
 
-                <hr
-                    style={{
-                        margin: "32px 0",
-                        border: "none",
-                        borderTop: "1px solid #e5e5e5",
-                    }}
-                />
+                <hr className="my-8 border-gray-200" />
 
-                <h2
-                    style={{
-                        margin: "0",
-                        fontSize: "22px",
-                        fontWeight: "600",
-                        color: "#222222",
-                    }}
-                >
+                <h2 className="text-xl font-semibold text-gray-900">
                     React Hooks Demo
                 </h2>
 
-                <p
-                    style={{
-                        marginTop: "12px",
-                        color: "#555555",
-                    }}
-                >
+                <p className="mt-3 text-gray-600">
                     {message}
                 </p>
 
-                <button
-                    onClick={() => setCount((count) => count + 1)}
-                    style={{
-                        marginTop: "8px",
-                        padding: "10px 18px",
-                        border: "none",
-                        borderRadius: "8px",
-                        backgroundColor: "#16a34a",
-                        color: "#ffffff",
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        cursor: "pointer",
-                    }}
-                >
-                    Click Me
-                </button>
+                <div className="mt-4">
+                    <button
+                        onClick={() => setCount((count) => count + 1)}
+                        className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700 active:scale-95"
+                    >
+                        Click Me
+                    </button>
+                </div>
 
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "12px",
-                        marginTop: "24px",
-                    }}
-                >
+                <div className="mt-6 flex gap-3">
                     <input
                         ref={inputRef}
                         type="text"
                         placeholder="useRef example"
-                        style={{
-                            flex: "1",
-                            padding: "10px 14px",
-                            border: "1px solid #d1d5db",
-                            borderRadius: "8px",
-                            outline: "none",
-                            fontSize: "14px",
-                            boxSizing: "border-box",
-                        }}
+                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
                     />
 
                     <button
                         onClick={handleFocus}
-                        style={{
-                            padding: "10px 18px",
-                            border: "1px solid #16a34a",
-                            borderRadius: "8px",
-                            backgroundColor: "#ffffff",
-                            color: "#16a34a",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                        }}
+                        className="rounded-lg border border-green-600 px-4 py-2 font-medium text-green-600 transition hover:bg-green-50"
                     >
                         Focus Input
                     </button>
