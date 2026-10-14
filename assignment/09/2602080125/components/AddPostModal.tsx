@@ -1,36 +1,53 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+
 export default function AddPostModal() {
     const [open, setOpen] = useState(false);
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
+    const [form, setForm] = useState({ title: "", content: "" });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const close = () => {
-        setOpen(false);
-        setError(null);
+    const canSubmit = form.title.trim() !== "" && form.content.trim() !== "" && !saving;
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async () => {
-        if (!title.trim() || !content.trim()) return;
+    const close = useCallback(() => {
+        setOpen(false);
+        setForm({ title: "", content: "" });
+        setError(null);
+    }, []);
+
+    useEffect(() => {
+        if (!open) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") close();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [open, close]);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!canSubmit) return;
+
         try {
             setSaving(true);
             setError(null);
             await addDoc(collection(db, "posts"), {
-                title: title.trim(),
-                content: content.trim(),
+                title: form.title.trim(),
+                content: form.content.trim(),
                 createdAt: serverTimestamp(),
             });
-            setTitle("");
-            setContent("");
-            setOpen(false);
-        } catch (e) {
-            console.error(e);
-            setError("Gagal menyimpan. Cek koneksi atau Firestore Rules.");
+            close();
+        } catch (err) {
+            console.error(err);
+            setError("Failed to save. Check your connection or Firestore rules.");
         } finally {
             setSaving(false);
         }
@@ -39,10 +56,12 @@ export default function AddPostModal() {
     return (
         <>
             <button
+                type="button"
                 onClick={() => setOpen(true)}
-                className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+                className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
-                + Tambah Post
+                <span aria-hidden>+</span>
+                New post
             </button>
 
             {open && (
@@ -50,44 +69,79 @@ export default function AddPostModal() {
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
                     onClick={close}
                 >
-                    <div
+                    <form
                         role="dialog"
                         aria-modal="true"
-                        className="w-full max-w-md rounded-lg bg-white p-6 text-black"
+                        aria-labelledby="add-post-title"
+                        onSubmit={handleSubmit}
                         onClick={(e) => e.stopPropagation()}
+                        className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
                     >
-                        <h2 className="mb-4 text-xl font-semibold">Tambah Post</h2>
-                        <input
-                            className="mb-3 w-full rounded border p-2"
-                            placeholder="Judul"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                        <textarea
-                            className="mb-3 w-full rounded border p-2"
-                            rows={4}
-                            placeholder="Isi post"
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                        />
+                        <h2 id="add-post-title" className="text-xl font-semibold">
+                            New post
+                        </h2>
+                        <p className="mt-1 text-sm text-zinc-500">
+                            Share something with everyone on the board.
+                        </p>
+
+                        <div className="mt-5 flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="post-title" className="text-sm font-medium">
+                                    Title
+                                </label>
+                                <input
+                                    id="post-title"
+                                    name="title"
+                                    autoFocus
+                                    value={form.title}
+                                    onChange={handleChange}
+                                    placeholder="Give your post a title"
+                                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="post-content" className="text-sm font-medium">
+                                    Content
+                                </label>
+                                <textarea
+                                    id="post-content"
+                                    name="content"
+                                    rows={5}
+                                    value={form.content}
+                                    onChange={handleChange}
+                                    placeholder="What's on your mind?"
+                                    className="w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+                                />
+                            </div>
+                        </div>
+
                         {error && (
-                            <p role="alert" className="mb-3 text-red-600">
+                            <p
+                                role="alert"
+                                className="mt-4 text-sm text-red-600 dark:text-red-400"
+                            >
                                 {error}
                             </p>
                         )}
-                        <div className="flex justify-end gap-2">
-                            <button onClick={close} className="rounded border px-4 py-2">
-                                Batal
+
+                        <div className="mt-6 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={close}
+                                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                            >
+                                Cancel
                             </button>
                             <button
-                                onClick={handleSubmit}
-                                disabled={saving || !title.trim() || !content.trim()}
-                                className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+                                type="submit"
+                                disabled={!canSubmit}
+                                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
                             >
-                                {saving ? "Menyimpan..." : "Simpan"}
+                                {saving ? "Saving..." : "Publish"}
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             )}
         </>

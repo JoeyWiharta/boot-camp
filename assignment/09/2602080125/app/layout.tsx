@@ -13,17 +13,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Assignment 09 - Next.js & Firebase",
-  description: "Firestore data fetching, real-time sync, search, and error handling",
+  title: {
+    default: "Public Posts",
+    template: "%s | Public Posts",
+  },
+  description:
+    "An open board for sharing ideas and reading what others are thinking, live.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="id"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-zinc-50 font-(family-name:--font-geist-sans) text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+        {children}
+      </body>
     </html>
   );
 }
