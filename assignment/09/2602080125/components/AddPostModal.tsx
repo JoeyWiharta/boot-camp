@@ -1,8 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-
+import { firebaseDb } from "@/lib/firebase";
 
 export default function AddPostModal() {
     const [open, setOpen] = useState(false);
@@ -39,7 +38,7 @@ export default function AddPostModal() {
         try {
             setSaving(true);
             setError(null);
-            await addDoc(collection(db, "posts"), {
+            await addDoc(collection(firebaseDb, "posts"), {
                 title: form.title.trim(),
                 content: form.content.trim(),
                 createdAt: serverTimestamp(),
