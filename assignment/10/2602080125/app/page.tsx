@@ -1,0 +1,17 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/provider/auth-provider";
+
+export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    router.replace(user ? "/user/profile" : "/login");
+  }, [user, loading, router]);
+
+  return <p className="p-8 text-center">Loading...</p>;
+}
