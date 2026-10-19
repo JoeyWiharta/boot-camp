@@ -22,8 +22,8 @@ interface loginPayload {
 }
 
 const loginSchema = z.object({
-    email: z.string().min(1, "Email wajib diisi").pipe(z.email("Format email tidak valid")),
-    password: z.string().min(1, "Password wajib diisi").min(8, "Password minimal 8 karakter"),
+    email: z.string().min(1, "Email is required").pipe(z.email("Invalid email format")),
+    password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
 })
 
 export default function LoginPage() {
@@ -34,11 +34,18 @@ export default function LoginPage() {
     const {
         register,
         handleSubmit,
+        reset,
         formState: {
             errors,
             isSubmitting
         }
     } = useForm<loginPayload>({ resolver: zodResolver(loginSchema) });
+
+    useEffect(() => {
+        reset();
+        setShowPassword(false);
+        setRememberMe(true);
+    }, [reset]);
 
     useEffect(() => {
         if (!loading && user) {
@@ -52,7 +59,6 @@ export default function LoginPage() {
             await signInWithEmailAndPassword(authFirebase, data.email, data.password);
             toast.success("Login successful");
             router.push("/user/profile");
-
         }
         catch {
             toast.error("Invalid email or password");
@@ -111,6 +117,7 @@ export default function LoginPage() {
                                     />
                                     <InputGroupAddon align="inline-end">
                                         <InputGroupButton
+                                            type="button"
                                             size="icon-xs"
                                             tabIndex={-1}
                                             aria-label={showPassword ? "Hide password" : "Show password"}
@@ -123,7 +130,7 @@ export default function LoginPage() {
                                 {errors.password && <FieldError>{errors.password.message}</FieldError>}
                             </Field>
 
-                            <Field orientation="horizontal" className="items-center gap-1.5">
+                            <Field orientation="horizontal" className="items-center gap-2">
                                 <Checkbox
                                     id="rememberMe"
                                     checked={rememberMe}

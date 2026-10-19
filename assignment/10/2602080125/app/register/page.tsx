@@ -8,38 +8,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, Mail, User, UserPlus } from "lucide-react";
+import { FirebaseError } from "firebase/app";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { authFirebase, dbFirebase } from "@/lib/firebase";
 import { useAuth } from "@/components/provider/auth-provider";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupButton,
-    InputGroupInput,
-} from "@/components/ui/input-group";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
-const schema = z.object({
-    name: z
-        .string()
-        .min(1, "Nama wajib diisi")
-        .max(50, "Nama maksimal 50 karakter"),
-    email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-    password: z
-        .string()
-        .min(1, "Password wajib diisi")
-        .min(6, "Password minimal 6 karakter"),
-});
-type FormData = z.infer<typeof schema>;
+interface registerPayload {
+    name: string;
+    email: string;
+    password: string;
+}
+
+const registerSchema = z.object({
+    name: z.string().min(1, "Name is required").max(50, "Name must be at most 50 characters"),
+    email: z.string().min(1, "Email is required").pipe(z.email("Invalid email format")),
+    password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
+})
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -48,139 +37,146 @@ export default function RegisterPage() {
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm<FormData>({ resolver: zodResolver(schema) });
+        reset,
+        formState: {
+            errors,
+            isSubmitting
+        }
+    } = useForm<registerPayload>({ resolver: zodResolver(registerSchema) });
 
     useEffect(() => {
-        if (!loading && user) router.replace("/user/profile");
-    }, [user, loading, router]);
+        reset();
+        setShowPassword(false);
+    }, [reset]);
 
-    const onSubmit = async (data: FormData) => {
+    useEffect(() => {
+        if (!loading && user) {
+            router.replace("/user/profile")
+        }
+    }, [user, loading, router])
+
+    const onSubmit = async (data: registerPayload) => {
         try {
-            const cred = await createUserWithEmailAndPassword(
-                authFirebase,
-                data.email,
-                data.password
-            );
+            const cred = await createUserWithEmailAndPassword(authFirebase, data.email, data.password);
             await setDoc(doc(dbFirebase, "users", cred.user.uid), {
                 email: cred.user.email,
                 name: data.name,
                 role: "user",
                 createdAt: serverTimestamp(),
             });
-            toast.success("Registrasi berhasil");
+            toast.success("Registration successful");
             router.push("/user/profile");
-        } catch (e: unknown) {
-            console.error(e);
-            const code = (e as { code?: string }).code;
-            toast.error(
-                code === "auth/email-already-in-use"
-                    ? "Registrasi gagal: email sudah terdaftar"
-                    : `Registrasi gagal (${code ?? "unknown"})`
-            );
         }
-    };
+        catch (e) {
+            const code = e instanceof FirebaseError ? e.code : undefined;
+            toast.error(code === "auth/email-already-in-use" ? "Email already registered" : "Registration failed");
+        }
+    }
 
     return (
-        <main className="flex flex-1 items-center justify-center p-4">
-            <Card className="w-full max-w-sm">
-                <CardHeader className="space-y-1 text-center">
-                    <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
-                        <UserPlus className="size-5" />
+        <main className="flex flex-1 items-center justify-center p-4 py-8">
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <div className="flex items-center gap-3 border-b pb-4">
+                        <UserPlus className="size-10 shrink-0 rounded-full bg-primary/10 p-2" />
+                        <div className="flex flex-col gap-0.5">
+                            <CardTitle className="text-xl">Create an account</CardTitle>
+                            <CardDescription>Fill in the details below to sign up</CardDescription>
+                        </div>
                     </div>
-                    <CardTitle className="text-xl">Buat akun</CardTitle>
-                    <CardDescription>Isi data di bawah untuk mendaftar</CardDescription>
                 </CardHeader>
+
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Nama</Label>
-                            <InputGroup>
-                                <InputGroupInput
-                                    id="name"
-                                    placeholder="Nama lengkap"
-                                    autoComplete="name"
-                                    required
-                                    maxLength={50}
-                                    aria-invalid={!!errors.name}
-                                    {...register("name")}
-                                />
-                                <InputGroupAddon align="inline-start">
-                                    <User />
-                                </InputGroupAddon>
-                            </InputGroup>
-                            {errors.name && (
-                                <p className="text-sm text-destructive">{errors.name.message}</p>
-                            )}
-                        </div>
+                    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                        <FieldGroup className="gap-4">
+                            <Field data-invalid={!!errors.name} className="gap-1.5">
+                                <FieldLabel htmlFor="name">Name</FieldLabel>
+                                <InputGroup className="h-10">
+                                    <InputGroupAddon align="inline-start">
+                                        <User />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        id="name"
+                                        placeholder="Full name"
+                                        autoComplete="name"
+                                        required
+                                        maxLength={50}
+                                        disabled={isSubmitting}
+                                        aria-invalid={!!errors.name}
+                                        {...register("name")}
+                                    />
+                                </InputGroup>
+                                {errors.name && <FieldError>{errors.name.message}</FieldError>}
+                            </Field>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <InputGroup>
-                                <InputGroupInput
-                                    id="email"
-                                    type="email"
-                                    placeholder="nama@email.com"
-                                    autoComplete="email"
-                                    required
-                                    aria-invalid={!!errors.email}
-                                    {...register("email")}
-                                />
-                                <InputGroupAddon align="inline-start">
-                                    <Mail />
-                                </InputGroupAddon>
-                            </InputGroup>
-                            {errors.email && (
-                                <p className="text-sm text-destructive">{errors.email.message}</p>
-                            )}
-                        </div>
+                            <Field data-invalid={!!errors.email} className="gap-1.5">
+                                <FieldLabel htmlFor="email">Email</FieldLabel>
+                                <InputGroup className="h-10">
+                                    <InputGroupAddon align="inline-start">
+                                        <Mail />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        id="email"
+                                        type="email"
+                                        placeholder="name@email.com"
+                                        autoComplete="email"
+                                        required
+                                        disabled={isSubmitting}
+                                        aria-invalid={!!errors.email}
+                                        {...register("email")}
+                                    />
+                                </InputGroup>
+                                {errors.email && <FieldError>{errors.email.message}</FieldError>}
+                            </Field>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <InputGroup>
-                                <InputGroupInput
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Minimal 6 karakter"
-                                    autoComplete="new-password"
-                                    required
-                                    minLength={6}
-                                    aria-invalid={!!errors.password}
-                                    {...register("password")}
-                                />
-                                <InputGroupAddon align="inline-end">
-                                    <InputGroupButton
-                                        type="button"
-                                        size="icon-xs"
-                                        aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                                        onClick={() => setShowPassword((s) => !s)}
-                                    >
-                                        {showPassword ? <EyeOff /> : <Eye />}
-                                    </InputGroupButton>
-                                </InputGroupAddon>
-                            </InputGroup>
-                            {errors.password && (
-                                <p className="text-sm text-destructive">{errors.password.message}</p>
-                            )}
-                        </div>
+                            <Field data-invalid={!!errors.password} className="gap-1.5">
+                                <FieldLabel htmlFor="password">Password</FieldLabel>
+                                <InputGroup className="h-10">
+                                    <InputGroupInput
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="At least 8 characters"
+                                        autoComplete="new-password"
+                                        required
+                                        minLength={8}
+                                        disabled={isSubmitting}
+                                        aria-invalid={!!errors.password}
+                                        {...register("password")}
+                                    />
+                                    <InputGroupAddon align="inline-end">
+                                        <InputGroupButton
+                                            type="button"
+                                            size="icon-xs"
+                                            tabIndex={-1}
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                            onClick={() => setShowPassword((s) => !s)}
+                                        >
+                                            {showPassword ? <EyeOff /> : <Eye />}
+                                        </InputGroupButton>
+                                    </InputGroupAddon>
+                                </InputGroup>
+                                {errors.password && <FieldError>{errors.password.message}</FieldError>}
+                            </Field>
 
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 size-4 animate-spin" />
-                                    Memproses...
-                                </>
-                            ) : (
-                                "Register"
-                            )}
-                        </Button>
-
-                        <p className="text-center text-sm text-muted-foreground">
-                            Sudah punya akun?{" "}
-                            <Link href="/login" className="font-medium text-foreground underline">
-                                Login
-                            </Link>
-                        </p>
+                            <Field className="gap-3">
+                                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="mr-2 size-4 animate-spin" />
+                                            Creating account...
+                                        </>
+                                    ) : (
+                                        "Register"
+                                    )}
+                                </Button>
+                                <FieldDescription className="text-center">
+                                    Already have an account?{" "}
+                                    <Link href="/login" className="font-medium text-foreground underline">
+                                        Login
+                                    </Link>
+                                </FieldDescription>
+                            </Field>
+                        </FieldGroup>
                     </form>
                 </CardContent>
             </Card>
