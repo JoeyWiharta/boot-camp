@@ -12,7 +12,7 @@ import { authFirebase } from "@/lib/firebase";
 import { useAuth } from "@/components/provider/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -60,7 +60,7 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="flex flex-1 items-center justify-center p-4">
+        <main className="flex flex-1 items-center justify-center p-4 py-8">
             <Card className="w-full max-w-md">
                 <CardHeader>
                     <div className="flex items-center gap-3 border-b pb-4">
@@ -77,7 +77,7 @@ export default function LoginPage() {
                         <FieldGroup className="gap-4">
                             <Field data-invalid={!!errors.email} className="gap-1.5">
                                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                                <InputGroup>
+                                <InputGroup className="h-10">
                                     <InputGroupAddon align="inline-start">
                                         <Mail />
                                     </InputGroupAddon>
@@ -97,7 +97,7 @@ export default function LoginPage() {
 
                             <Field data-invalid={!!errors.password} className="gap-1.5">
                                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                                <InputGroup>
+                                <InputGroup className="h-10">
                                     <InputGroupInput
                                         id="password"
                                         type={showPassword ? "text" : "password"}
@@ -146,12 +146,12 @@ export default function LoginPage() {
                                         "Login"
                                     )}
                                 </Button>
-                                <FieldLabel className="flex text-center text-sm text-muted-foreground justify-center">
-                                    Don't have an account?{" "}
+                                <FieldDescription className="text-center">
+                                    Don&apos;t have an account?{" "}
                                     <Link href="/register" className="font-medium text-foreground underline">
                                         Register
                                     </Link>
-                                </FieldLabel>
+                                </FieldDescription>
                             </Field>
                         </FieldGroup>
                     </form>
