@@ -1,10 +1,15 @@
 import RoleGuard from "@/components/guard/RoleGuard";
 import MainLayout from "@/components/layout/MainLayout";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+interface AdminLayoutProps {
+    children: React.ReactNode
+}
+
+const AdminLayout = ({ children }: AdminLayoutProps) => {
     return (
         <RoleGuard requiredRole="admin">
             <MainLayout>{children}</MainLayout>
         </RoleGuard>
     );
 }
+export default AdminLayout

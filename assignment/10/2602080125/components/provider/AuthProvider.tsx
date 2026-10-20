@@ -24,7 +24,6 @@ const ROLE_FETCH_DELAY_MS = 500;
 const AuthContext = createContext<AuthContextType | null>(null);
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-
 const fetchRole = async (uid: string): Promise<Role | null> => {
     for (let i = 0; i < ROLE_FETCH_RETRIES; i++) {
         try {

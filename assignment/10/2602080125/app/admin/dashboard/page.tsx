@@ -1,4 +1,4 @@
-export default function AdminDashboardPage() {
+const AdminDashboardPage = () => {
     return (
         <section className="space-y-6">
             <div>
@@ -6,9 +6,10 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-muted-foreground">Accessible only to users with the admin role.</p>
             </div>
 
-            <div className="flex min-h-128 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground border-primary">
+            <div className="flex min-h-100 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground border-primary">
                 Content goes here
             </div>
         </section>
     );
 }
+export default AdminDashboardPage;

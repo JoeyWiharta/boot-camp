@@ -26,7 +26,7 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
 })
 
-export default function LoginPage() {
+const LoginPage = () => {
     const router = useRouter();
     const { user, loading } = useAuth();
     const [rememberMe, setRememberMe] = useState(true);
@@ -142,7 +142,7 @@ export default function LoginPage() {
                                 </FieldLabel>
                             </Field>
 
-                            <div className="border-b"/>
+                            <div className="border-b" />
 
                             <Field className="gap-3">
                                 <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -169,3 +169,4 @@ export default function LoginPage() {
         </main>
     );
 }
+export default LoginPage;

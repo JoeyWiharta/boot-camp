@@ -1,10 +1,15 @@
 import RoleGuard from "@/components/guard/RoleGuard";
 import MainLayout from "@/components/layout/MainLayout";
 
-export default function UserLayout({ children }: { children: React.ReactNode }) {
+interface UserLayoutProps {
+    children: React.ReactNode
+}
+
+const UserLayout = ({ children }: UserLayoutProps) => {
     return (
         <RoleGuard>
             <MainLayout>{children}</MainLayout>
         </RoleGuard>
     );
 }
+export default UserLayout

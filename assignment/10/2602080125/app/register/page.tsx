@@ -30,7 +30,7 @@ const registerSchema = z.object({
     password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
 })
 
-export default function RegisterPage() {
+const RegisterPage = () => {
     const router = useRouter();
     const { user, loading } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
@@ -185,3 +185,4 @@ export default function RegisterPage() {
         </main>
     );
 }
+export default RegisterPage;
