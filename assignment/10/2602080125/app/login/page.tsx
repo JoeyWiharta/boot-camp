@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, LogIn, Mail } from "lucide-react";
 import { browserLocalPersistence, browserSessionPersistence, setPersistence, signInWithEmailAndPassword } from "firebase/auth";
 import { authFirebase } from "@/lib/firebase";
-import { useAuth } from "@/components/provider/auth-provider";
+import { useAuth } from "@/components/provider/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -141,6 +141,8 @@ export default function LoginPage() {
                                     Remember me
                                 </FieldLabel>
                             </Field>
+
+                            <div className="border-b"/>
 
                             <Field className="gap-3">
                                 <Button type="submit" className="w-full" disabled={isSubmitting}>

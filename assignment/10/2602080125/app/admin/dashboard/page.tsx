@@ -1,25 +1,14 @@
-"use client";
-
-import Link from "next/link";
-import { RoleGuard } from "@/components/guard/role-guard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 export default function AdminDashboardPage() {
     return (
-        <RoleGuard requiredRole="admin">
-            <main className="flex flex-1 items-center justify-center p-4">
-                <Card className="w-full max-w-sm">
-                    <CardHeader>
-                        <CardTitle>Admin Dashboard</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                        <p>Welcome, Admin.</p>
-                        <Link href="/user/profile" className="underline">
-                            Kembali ke Profile
-                        </Link>
-                    </CardContent>
-                </Card>
-            </main>
-        </RoleGuard>
+        <section className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-semibold">Admin Panel</h1>
+                <p className="text-sm text-muted-foreground">Accessible only to users with the admin role.</p>
+            </div>
+
+            <div className="flex min-h-128 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground border-primary">
+                Content goes here
+            </div>
+        </section>
     );
 }

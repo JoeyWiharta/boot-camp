@@ -1,50 +1,52 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/provider/auth-provider";
-import { RoleGuard } from "@/components/guard/role-guard";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useAuth } from "@/components/provider/AuthProvider";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-function ProfileContent() {
-    const { user, role, logout } = useAuth();
-    const router = useRouter();
-
-    const handleLogout = async () => {
-        await logout();
-        toast.success("Logout berhasil");
-        router.push("/login");
-    };
-
-    return (
-        <main className="flex flex-1 items-center justify-center p-4">
-            <Card className="w-full max-w-sm">
-                <CardHeader>
-                    <CardTitle>Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <p>Email: {user?.email}</p>
-                    <p>Role: {role}</p>
-                    {role === "admin" && (
-                        <Link href="/admin/dashboard" className="block underline">
-                            Ke Admin Dashboard
-                        </Link>
-                    )}
-                    <Button onClick={handleLogout} variant="outline" className="w-full">
-                        Logout
-                    </Button>
-                </CardContent>
-            </Card>
-        </main>
-    );
-}
+const formatDate = (value?: string | null) =>
+    value ? new Date(value).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "-";
 
 export default function ProfilePage() {
+    const { user, role } = useAuth();
+
+    const rows: { label: string; value: React.ReactNode }[] = [
+        { label: "Email", value: user?.email ?? "-" },
+        {
+            label: "Role",
+            value: role ? <Badge variant={role === "admin" ? "default" : "secondary"}>{role}</Badge> : "-",
+        },
+        { label: "User ID", value: user?.uid ?? "-" },
+        { label: "Created at", value: formatDate(user?.metadata.creationTime) },
+        { label: "Last sign-in", value: formatDate(user?.metadata.lastSignInTime) },
+    ];
+
     return (
-        <RoleGuard>
-            <ProfileContent />
-        </RoleGuard>
+        <section className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-semibold">User Panel</h1>
+                <p className="text-sm text-muted-foreground">Accessible to any authenticated user.</p>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Account information</CardTitle>
+                    <CardDescription>Details of the account you are signed in with.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <dl className="divide-y">
+                        {rows.map((row) => (
+                            <div
+                                key={row.label}
+                                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                            >
+                                <dt className="text-sm text-muted-foreground">{row.label}</dt>
+                                <dd className="min-w-0 break-all text-sm font-medium sm:text-right">{row.value}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                </CardContent>
+            </Card>
+        </section>
     );
 }

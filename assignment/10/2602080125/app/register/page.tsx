@@ -12,7 +12,7 @@ import { FirebaseError } from "firebase/app";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { authFirebase, dbFirebase } from "@/lib/firebase";
-import { useAuth } from "@/components/provider/auth-provider";
+import { useAuth } from "@/components/provider/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -157,6 +157,8 @@ export default function RegisterPage() {
                                 </InputGroup>
                                 {errors.password && <FieldError>{errors.password.message}</FieldError>}
                             </Field>
+
+                            <div className="border-b" />
 
                             <Field className="gap-3">
                                 <Button type="submit" className="w-full" disabled={isSubmitting}>
